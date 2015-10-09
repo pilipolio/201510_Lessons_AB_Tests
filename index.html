@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=1024, user-scalable=no">
+
+  <title> A few lessons learnt running A/B tests </title>
+
+  <!-- Required stylesheet -->
+  <link rel="stylesheet" media="screen" href="core/deck.core.css">
+
+  <!-- Extension CSS files go here. Remove or add as needed. -->
+  <link rel="stylesheet" media="screen" href="extensions/goto/deck.goto.css">
+  <link rel="stylesheet" media="screen" href="extensions/menu/deck.menu.css">
+  <link rel="stylesheet" media="screen" href="extensions/navigation/deck.navigation.css">
+  <link rel="stylesheet" media="screen" href="extensions/status/deck.status.css">
+  <link rel="stylesheet" media="screen" href="extensions/scale/deck.scale.css">
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+    </script>
+    <script type="text/javascript"
+            src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+
+  <!-- Style theme. More available in /themes/style/ or create your own. -->
+  <link rel="stylesheet" media="screen" href="themes/style/web-2.0.css">
+
+  <!-- Transition theme. More available in /themes/transition/ or create your own. -->
+  <link rel="stylesheet" media="screen" href="themes/transition/horizontal-slide.css">
+
+  <!-- Basic black and white print styles -->
+  <link rel="stylesheet" media="print" href="core/print.css">
+
+  <!-- Required Modernizr file -->
+  <script src="modernizr.custom.js"></script>
+
+  <style type="text/css">
+      .dataframe table, .dataframe tr, .dataframe th, .dataframe td {
+          border: 1px solid black;
+          color: black;
+          border-collapse: collapse;
+          margin: 1em 2em;
+          font-size: 75%;
+          font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+          border-spacing: 0;
+      }
+      .dataframe td, .dataframe th {
+          padding: 4px;
+          text-align: left;
+          vertical-align: middle;
+      }
+      .dataframe th {
+          font-weight: bold;
+      }
+
+      .highlighted{ background-color: rgba(0, 0, 0, 0.25); }
+      .uiOne{ background-color: rgba(0, 0, 0, 0.5); font-weight:bold; }
+  </style>
+
+</head>
+<body>
+  <div class="deck-container">
+
+    <section class="slide">
+      <h1> A few lessons learnt running A/B tests </h1>
+    </section>
+    
+    <section class="slide">
+      <h2> What is A/B testing? </h2>
+
+      <table>
+        <tr>
+          <td style="width:800px">
+            <h3> A data driven decision procedure </h3>
+	    <ul> 
+	      <li> Two or more variants
+	      <li> Compared using an audience based metric
+	      <li> While "all other things are equal"
+	    </ul>
+	    
+	    <h3> The latter is crucial! </h3>
+	    <ul>
+	      <li> Simultaneous
+	      <li> Over (at least) a whole business cycle
+	      <li> Fair split of users
+	    </ul>
+          </td>
+          <td style="width:800px" align="center">
+            <img src="images/ab-testing.jpg" height="100%" width="100%">
+          </td>
+        </tr>
+      </table>
+    </section>
+
+    <section class="slide">
+      <h2> Statistical hypothesis testing </h2>
+
+      <h3> Dwell time </h3>
+      <ul>
+	<li> $n$ user dwell times measurements with noise $\sigma$
+	<li> $\text{Average Use Dwell Time} \sim \mathcal{N}(\mu, \frac{\sigma}{\sqrt{n}})$ (CLT)
+	<li> $H_0$ : $\mu_A = \mu_B$ versus $H_1$ : $\mu_A \neq \mu_B$
+      </ul>
+
+      <h3> Click Through Rate $p$ </h3>
+      <ul> 
+	<li> $n$ impressions with outcome $\{0,1\}$
+	<li> $\text{#Clicks} \sim Bin(n, p)$, then if $n$ large, $p \approx \mathcal{N}(np , np(1-p))$
+      </ul>
+            
+      <h3> Decision rule between $H_0$ and $H_1$ </h3>
+      <ul>
+	<li> Evaluate $H_0$ versus $H_1$ based on actual samples
+	<li> Is the significance level $\alpha$ (false positive rate) low enough
+	<li> Minimum Effect Difference, noise and $\alpha$ $\Rightarrow$ $n$
+      </ul>
+    </section>
+
+    <section class="slide">
+      <h2> Statistical tooling : the t-test </h2>
+
+      <table>
+        <tr>
+          <td style="width:800px">
+	    <img src="images/t-test-not-significant.png" height="100%" width="100%">
+          </td>
+          <td style="width:800px" align="center">
+	    <img src="images/t-test-significant.png" height="100%" width="100%">
+          </td>
+        </tr>
+      </table>
+	    
+      <h3> From <a href="http://www.evanmiller.org/ab-testing/t-test.html"> http://www.evanmiller.org/ab-testing/t-test.html </a> </h3>
+    </section>
+
+	
+    <section class="slide">
+      <h2> Caveats and pitfalls </h2>
+
+      <table>
+        <tr>
+          <td style="width:800px">
+	    
+	    <h3> Abundant litterature </h3>
+	    <ul> 
+	      <li> <a href="http://www.evanmiller.org/how-not-to-run-an-ab-test.html"> "How not to run an AB test?" </a>
+	<li> <a href="http://www.qubit.com/sites/default/files/pdf/mostwinningabtestresultsareillusory_0.pdf"> "Most winning A/B test results are illusory" </a>
+	<li> <a href="https://www.chrisstucchio.com/blog/2015/no_free_samples.html"> "No free samples" </a>
+      </ul>
+
+      <h3> Breaking assumptions </h3>
+      <ul>
+	<li> Early peeking: not fixing $n$ in advance
+	<li> Multiple testing: $P[FP] = 1 - 0.95 \times 0.95 \times \ldots$
+	<li> Individual measurements not i.i.d.
+      </ul>
+
+      <h3> Or misunderstandings </h3>
+      <ul>
+	<li> Reversion to mediocrity
+	<li> Global model may be to coarse $\Rightarrow$ personalisation!
+      </ul>
+      
+          </td>
+          <td style="width:800px" align="center">
+            <img src="images/exams_dependent.png" height="120%" width="120%">
+          </td>
+        </tr>
+      </table>
+
+    </section>
+
+    <section class="slide">
+      <h2> Agile thinking is relevant for AB testing </h2>
+
+      <h3> Things can go wrong in so many ways </h3>
+      <ul> 
+	<li> Collection biases
+	<li> Insensitive metric
+	<li> Spill over effects
+	  <br><br>
+	  $\Rightarrow$ release early, start with A/A/B tests
+      </ul>
+
+      <h3> With practise comes success!  </h3>
+
+      <h3> But don't test randomly </h3>
+      <ul>
+	<li> Come up with hypothesis
+	<li> Sketch out possible outcomes and conclusions beforehand
+	<li> Validate as much as possible off-line
+      </ul>
+      
+    </section>
+
+    <section class="slide">
+      <h2> The off-line / on-line testing methodology </h2>
+      
+      <img src="images/Offline-online-testing_diagram.png" height="80%" width="80%">
+      <h3> From a Netflix <a href="http://techblog.netflix.com/2012/06/netflix-recommendations-beyond-5-stars.html"> blog post </a> </h3>
+    </section>
+
+    
+    <section class="slide">
+      <h2> Data collection </h2>
+      
+      <table>
+        <tr>
+          <td style="width:800px">
+            <h3> Server side logging </h3>
+	    <ul> 
+	      <li> Join <code>RecLogs</code> with <code>UserEvents</code> on <code>userId,itemId,timestamp</code>
+	      <li> Pros : no client side instrumentation
+	      <li> Cons : less specific
+	    </ul>
+
+            <h3> Additional client side logging </h3>
+	    <ul> 
+	      <li> Join <code>RecLogs</code> with <code>UserEvents</code> on <code>recId</code>
+	      <li> Pros : more accurate
+	      <li> Cons : client side work
+	    </ul>
+          </td>
+          <td style="width:800px" align="center">
+            <img src="images/ab-testing-data-collection-with-rec-id.png" height="100%" width="100%">
+          </td>
+        </tr>
+      </table>
+    </section>
+
+    <section class="slide">
+      <h2> To go further </h2>
+      
+      <h3>AB tests as $\epsilon$ first Multi Armed Bandits </h3>
+      
+      <ul> 
+	<li> <a href="https://www.chrisstucchio.com/blog/2012/bandit_algorithms_vs_ab.html">https://www.chrisstucchio.com/blog/2012/bandit_algorithms_vs_ab.html </a>
+	<li> <a href="http://www.cs.mcgill.ca/~vkules/bandits.pdf">http://www.cs.mcgill.ca/~vkules/bandits.pdf</a>
+      </ul>
+      
+      <h3> Bayesian AB testing </h3>
+      <ul>
+	<li> <a href="http://engineering.richrelevance.com/bayesian-ab-tests"> http://engineering.richrelevance.com/bayesian-ab-tests </a>
+	<li> <a href="http://developers.lyst.com/data/2014/05/10/bayesian-ab-testing/"> http://developers.lyst.com/data/2014/05/10/bayesian-ab-testing/ </a>
+	<li> <a href="https://www.udacity.com/course/ab-testing--ud257"> https://www.udacity.com/course/ab-testing--ud257</a>
+      </ul>
+
+      <h3> Long term effects </h3>
+
+      <ul>
+	<li> <a href="http://static.googleusercontent.com/media/research.google.com/en//pubs/archive/43887.pdf"> Focusing on the Long-term: It's Good for Users and Business </a>
+      </ul>
+
+      <h3> On-line course </h3>
+
+      <ul>
+	<li> <a href="https://www.udacity.com/course/ab-testing--ud257"> https://www.udacity.com/course/ab-testing--ud257</a>
+      </ul>
+
+    </section>
+
+    <!-- End slides. -->
+
+    <!-- Begin extension snippets. Add or remove as needed. -->
+
+    <!-- deck.navigation snippet -->
+    <div aria-role="navigation">
+      <a href="#" class="deck-prev-link" title="Previous">&#8592;</a>
+      <a href="#" class="deck-next-link" title="Next">&#8594;</a>
+    </div>
+
+    <!-- deck.status snippet -->
+    <p class="deck-status" aria-role="status">
+      <span class="deck-status-current"></span>
+      /
+      <span class="deck-status-total"></span>
+    </p>
+
+    <!-- deck.goto snippet -->
+    <form action="." method="get" class="goto-form">
+      <label for="goto-slide">Go to slide:</label>
+      <input type="text" name="slidenum" id="goto-slide" list="goto-datalist">
+      <datalist id="goto-datalist"></datalist>
+      <input type="submit" value="Go">
+    </form>
+
+    <!-- End extension snippets. -->
+  </div>
+
+<!-- Required JS files. -->
+<script src="jquery.min.js"></script>
+<script src="core/deck.core.js"></script>
+
+<!-- Extension JS files. Add or remove as needed. -->
+<script src="extensions/menu/deck.menu.js"></script>
+<script src="extensions/goto/deck.goto.js"></script>
+<script src="extensions/status/deck.status.js"></script>
+<script src="extensions/navigation/deck.navigation.js"></script>
+<script src="extensions/scale/deck.scale.js"></script>
+
+<!-- Initialize the deck. You can put this in an external file if desired. -->
+<script>
+  $(function() {
+    $.deck('.slide');
+  });
+</script>
+</body>
+</html>
